@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>布里斯本旅遊地圖 V0.1</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <style>
+        /* CSS 樣式設定 */
+        body {
+            padding: 0;
+            margin: 0;
+        }
+        html, body, #map {
+            height: 100%;
+            width: 100vw;
+        }
+        .custom-popup .leaflet-popup-content-wrapper {
+            background: #fff;
+            color: #333;
+            font-family: 'Arial', sans-serif;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <script>
+        // 初始化地圖，設定布里斯本座標 [-27.4698, 153.0251]
+        var map = L.map('map', {
+            center: [-27.4698, 153.0251],
+            zoom: 14,
+            zoomControl: false // 為了手機簡潔，先關閉預設按鈕
+        });
+
+        // 加入地圖圖層 (使用 OpenStreetMap)
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        // 將縮放按鈕移到右下角，避開手機操作盲點
+        L.control.zoom({
+            position: 'bottomright'
+        }).addTo(map);
+
+        // 加入景點標記
+        var locations = [
+            { name: "布里斯本市中心 (CBD)", coord: [-27.4698, 153.0251] },
+            { name: "南岸公園 (South Bank)", coord: [-27.4764, 153.0210] },
+            { name: "故事橋 (Story Bridge)", coord: [-27.4633, 153.0353] }
+        ];
+
+        locations.forEach(function(loc) {
+            L.marker(loc.coord).addTo(map)
+                .bindPopup("<b>" + loc.name + "</b><br>歡迎來到布里斯本！");
+        });
+
+        // 偵測縮放，確保行動端順暢
+        map.on('dblclick', function() {
+            map.zoomIn();
+        });
+    </script>
+</body>
+</html>
