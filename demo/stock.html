@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AntEmpire Financial V0.12</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
+    <style>
+        :root { --bg: #0a0a0a; --ant-red: #ff4d4d; --ant-green: #2ecc71; --gold: #f1c40f; }
+        body { margin: 0; background: var(--bg); color: white; font-family: sans-serif; overflow: hidden; touch-action: none; }
+        #scene { width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; }
+        #app-panel { width: 340px; background: #1a1a1a; padding: 20px; border-radius: 30px; border: 2px solid #333; transform-origin: center; cursor: grab; }
+        .stock-row { display: flex; justify-content: space-between; padding: 15px; margin: 8px 0; background: #222; border-radius: 15px; transition: 0.3s; }
+        .up { border-left: 5px solid var(--ant-red); box-shadow: -5px 0 10px rgba(255,77,77,0.2); }
+        .down { border-left: 5px solid var(--ant-green); box-shadow: -5px 0 10px rgba(46,204,113,0.2); }
+        .weather { font-size: 12px; color: var(--gold); margin-bottom: 10px; }
+        .btn-clear { width: 100%; padding: 10px; margin-top: 15px; border-radius: 10px; border: 1px solid #ff4d4d; background: transparent; color: #ff4d4d; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+<div id="scene">
+    <div id="app-panel">
+        <div class="weather">🌦 蟻國氣候：資金半衰期正常</div>
+        <div id="stock-container">
+            </div>
+        <button class="btn-clear" onclick="clearLocalData()">刪除所有本機費洛蒙資料</button>
+        <p style="font-size:10px; color:#555; margin-top:10px;">Ver 0.12 | PC 滾輪縮放 / 行動雙指縮放</p>
+    </div>
+</div>
+
+<script>
+    const stocks = [
+        { name: "0050", price: 150.5, type: "引導" },
+        { name: "00878", price: 22.3, type: "招募" },
+        { name: "2330", price: 780.0, type: "警報" },
+        { name: "4991", price: 55.4, type: "識別" }
+    ];
+
+    function render() {
+        const container = document.getElementById('stock-container');
+        container.innerHTML = stocks.map(s => {
+            const change = (Math.random() * 4 - 2).toFixed(2);
+            const isUp = change >= 0;
+            return `
+                <div class="stock-row ${isUp ? 'up' : 'down'}">
+                    <div><strong>${s.name}</strong><br><small>${s.type}費洛蒙</small></div>
+                    <div style="text-align:right">
+                        <span style="color:${isUp?'#ff4d4d':'#2ecc71'}">${isUp?'▲':'▼'} ${Math.abs(change)}%</span><br>
+                        <span>$${(s.price * (1 + change/100)).toFixed(2)}</span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // 模擬實時波動
+    setInterval(render, 3000);
+    render();
+
+    // 手勢縮放與拖曳邏輯 (同 V0.11 核心代碼)
+    let scale = 1, posX = 0, posY = 0;
+    const panel = document.getElementById('app-panel');
+    const mc = new Hammer.Manager(document.body);
+    mc.add(new Hammer.Pan());
+    mc.add(new Hammer.Pinch());
+    mc.on("panmove", e => { panel.style.transform = `translate(${posX + e.deltaX}px, ${posY + e.deltaY}px) scale(${scale})`; });
+    mc.on("panend", e => { posX += e.deltaX; posY += e.deltaY; });
+    mc.on("pinchmove", e => { panel.style.transform = `translate(${posX}px, ${posY}px) scale(${scale * e.scale})`; });
+    mc.on("pinchend", e => { scale *= e.scale; });
+    window.addEventListener('wheel', e => { e.preventDefault(); scale += e.deltaY > 0 ? -0.05 : 0.05; panel.style.transform = `translate(${posX}px, ${posY}px) scale(${scale})`; }, {passive: false});
+
+    function clearLocalData() { if(confirm("確定刪除？")) location.reload(); }
+</script>
+</body>
+</html>
